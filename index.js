@@ -49,6 +49,24 @@ app.get('/img', async (req, res) => {
 });
 
 app.get('/', (req, res) => res.json({ status: 'Ironwood proxy running' }));
+// ── Anthropic proxy — powers the Ad Workbench "Generate" button ──
+app.post('/generate', async (req, res) => {
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify(req.body)
+    });
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Proxy running on port ${PORT}`));
